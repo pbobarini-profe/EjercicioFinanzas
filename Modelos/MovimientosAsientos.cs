@@ -10,6 +10,7 @@ namespace Modelos
     {
          public int id { get; set; }
         public Movimientos movimiento { get; set; }
+
         public Asientos asiento { get; set; }
     }
 }

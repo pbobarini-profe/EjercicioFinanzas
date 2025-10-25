@@ -10,7 +10,7 @@ namespace Modelos
     {
         public int id { get; set; }
         public DateTime fecha { get; set; }
-        public string descripcion { get; set; }
+        public string descripcion { get; set; }//varchar max
         public TiposAsientos tipoAsiento { get; set; } //gasto, apertura, ingreso, pago, cobro, ajuste
     }
 }

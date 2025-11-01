@@ -9,3 +9,100 @@ A tener en cuenta:
 <img width="625" height="436" alt="image" src="https://github.com/user-attachments/assets/ca2281f5-bc50-45e2-8b81-d1a298d7e701" />
 Ponen nueva rama y le colocan su nombre.  
 Siempre que esten desarrollando asegurense tener su rama seleccionada. Cualquier duda la vemos en clase  
+//
+--create de las tablas
+
+-- Tabla: TiposAsientos
+CREATE TABLE dbo.TiposAsientos (
+    id            INT IDENTITY(1,1) NOT NULL,
+    descripcion   NVARCHAR(200)     NOT NULL,
+    CONSTRAINT PK_TiposAsientos PRIMARY KEY CLUSTERED (id)
+);
+GO
+
+-- Tabla: TipoComprobantes
+CREATE TABLE dbo.TipoComprobantes (
+    id            INT IDENTITY(1,1) NOT NULL,
+    descripcion   NVARCHAR(200)     NOT NULL,
+    CONSTRAINT PK_TipoComprobantes PRIMARY KEY CLUSTERED (id)
+);
+GO
+
+-- Tabla: Rubros
+-- tipoRubro: 1-Activo | 2-Pasivo | 3-Patrimonio Neto | 4-Ingresos | 5-Egresos
+CREATE TABLE dbo.Rubros (
+    id            INT IDENTITY(1,1) NOT NULL,
+    descripcion   NVARCHAR(200)     NOT NULL,
+    tipoRubro     INT               NOT NULL,
+    CONSTRAINT PK_Rubros PRIMARY KEY CLUSTERED (id),
+    CONSTRAINT CK_Rubros_Tipo CHECK (tipoRubro IN (1,2,3,4,5))
+);
+GO
+
+-- Tabla: Cuentas
+CREATE TABLE dbo.Cuentas (
+    id          INT IDENTITY(1,1) NOT NULL,
+    descripcion NVARCHAR(200)     NOT NULL,
+    rubroId     INT               NOT NULL,
+    CONSTRAINT PK_Cuentas PRIMARY KEY CLUSTERED (id),
+    CONSTRAINT FK_Cuentas_Rubros
+        FOREIGN KEY (rubroId) REFERENCES dbo.Rubros(id)
+);
+GO
+
+-- Tabla: Comprobantes
+CREATE TABLE dbo.Comprobantes (
+    id                 INT IDENTITY(1,1) NOT NULL,
+    descripcion        NVARCHAR(200)     NOT NULL,
+    numero             NVARCHAR(50)      NOT NULL,
+    monto              DECIMAL(18,2)     NOT NULL,
+    fecha              DATETIME2(7)      NOT NULL,
+    tipoComprobanteId  INT               NOT NULL,
+    CONSTRAINT PK_Comprobantes PRIMARY KEY CLUSTERED (id),
+    CONSTRAINT FK_Comprobantes_TipoComprobantes
+        FOREIGN KEY (tipoComprobanteId) REFERENCES dbo.TipoComprobantes(id)
+);
+GO
+
+-- Tabla: Asientos
+-- descripcion: NVARCHAR(MAX) según comentario del modelo
+CREATE TABLE dbo.Asientos (
+    id            INT IDENTITY(1,1) NOT NULL,
+    fecha         DATETIME2(7)      NOT NULL,
+    descripcion   NVARCHAR(MAX)     NOT NULL,
+    tipoAsientoId INT               NOT NULL,
+    CONSTRAINT PK_Asientos PRIMARY KEY CLUSTERED (id),
+    CONSTRAINT FK_Asientos_TiposAsientos
+        FOREIGN KEY (tipoAsientoId) REFERENCES dbo.TiposAsientos(id)
+);
+GO
+
+-- Tabla: Movimientos
+-- debeHaber: 1-Debe | 2-Haber
+CREATE TABLE dbo.Movimientos (
+    id            INT IDENTITY(1,1) NOT NULL,
+    cuentaId      INT               NOT NULL,
+    comprobanteId INT               NOT NULL,
+    debeHaber     INT               NOT NULL,
+    monto         DECIMAL(18,2)     NOT NULL,
+    CONSTRAINT PK_Movimientos PRIMARY KEY CLUSTERED (id),
+    CONSTRAINT FK_Movimientos_Cuentas
+        FOREIGN KEY (cuentaId) REFERENCES dbo.Cuentas(id),
+    CONSTRAINT FK_Movimientos_Comprobantes
+        FOREIGN KEY (comprobanteId) REFERENCES dbo.Comprobantes(id),
+    CONSTRAINT CK_Movimientos_DebeHaber CHECK (debeHaber IN (1,2))
+);
+GO
+
+-- Tabla: MovimientosAsientos
+CREATE TABLE dbo.MovimientosAsientos (
+    id           INT IDENTITY(1,1) NOT NULL,
+    movimientoId INT               NOT NULL,
+    asientoId    INT               NOT NULL,
+    CONSTRAINT PK_MovimientosAsientos PRIMARY KEY CLUSTERED (id),
+    CONSTRAINT FK_MovAsi_Movimientos
+        FOREIGN KEY (movimientoId) REFERENCES dbo.Movimientos(id),
+    CONSTRAINT FK_MovAsi_Asientos
+        FOREIGN KEY (asientoId) REFERENCES dbo.Asientos(id)
+);
+GO
